@@ -1,9 +1,10 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
 
-/* GET home page. */
-router.get("/", function (req, res, next) {
-    res.send("media");
-});
+const { index, store, destroy } = require("../controllers/MediaController");
+
+router.get("/", index);
+router.post("/", store);
+router.delete("/:id", destroy);
 
 module.exports = router;
