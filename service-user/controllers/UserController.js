@@ -195,10 +195,10 @@ module.exports = {
             message: "successfully update user profile",
             data: {
                 id: updatedUser.id,
-                name,
-                email,
-                profession,
-                avatar,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                profession: updatedUser.profession,
+                avatar: updatedUser.avatar,
             },
         });
     },
