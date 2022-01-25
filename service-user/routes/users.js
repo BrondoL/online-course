@@ -5,12 +5,16 @@ const {
     register,
     login,
     update,
+    show,
     index,
+    logout,
 } = require("../controllers/UserController");
 
-router.get("/:id", index);
+router.get("/", index);
+router.get("/:id", show);
+router.put("/:id", update);
 router.post("/register", register);
 router.post("/login", login);
-router.put("/:id", update);
+router.post("/logout", logout);
 
 module.exports = router;

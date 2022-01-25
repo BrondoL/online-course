@@ -1,10 +1,31 @@
-const { User } = require("../models");
+const { User, RefreshToken } = require("../models");
 const bcrypt = require("bcrypt");
 const validator = require("fastest-validator");
 const v = new validator();
 
 module.exports = {
     index: async (req, res) => {
+        const userIds = req.query.user_ids || [];
+
+        const sqlOptions = {
+            attributes: ["id", "name", "email", "profession", "role", "avatar"],
+        };
+
+        if (userIds.length) {
+            sqlOptions.where = {
+                id: userIds,
+            };
+        }
+
+        const users = await User.findAll(sqlOptions);
+
+        return res.json({
+            status: "success",
+            message: "get list user",
+            data: users,
+        });
+    },
+    show: async (req, res) => {
         const { id } = req.params;
         const user = await User.findByPk(id, {
             attributes: ["id", "name", "email", "role", "profession", "avatar"],
@@ -179,6 +200,27 @@ module.exports = {
                 profession,
                 avatar,
             },
+        });
+    },
+    logout: async (req, res) => {
+        const { user_id } = req.body;
+
+        const user = await User.findByPk(user_id);
+
+        if (!user) {
+            return res.status(404).json({
+                status: "error",
+                message: "user not found",
+            });
+        }
+
+        await RefreshToken.destroy({
+            where: { user_id },
+        });
+
+        return res.json({
+            status: "success",
+            message: "refresh token deleted successfully",
         });
     },
 };
