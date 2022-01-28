@@ -1,9 +1,19 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
 
-/* GET home page. */
-router.get("/", function (req, res, next) {
-    res.send("courses");
-});
+const {
+    index,
+    show,
+    destroy,
+    store,
+    update,
+} = require("../controllers/CourseController");
 
+const verifyToken = require("../middlewares/verifyToken");
+
+router.get("/", index);
+router.get("/:id", show);
+router.post("/", verifyToken, store);
+router.put("/:id", verifyToken, update);
+router.delete("/:id", verifyToken, destroy);
 module.exports = router;
