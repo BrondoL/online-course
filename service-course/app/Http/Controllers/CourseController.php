@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Chapter;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -20,11 +21,11 @@ class CourseController extends Controller
         $q = $request->q;
         $status = $request->status;
 
-        $courses->when($q, function($query) use ($q) {
+        $courses->when($q, function ($query) use ($q) {
             return $query->whereRaw("name LIKE '%" . strtolower($q) . "%'");
         });
 
-        $courses->when($status, function($query) use ($status) {
+        $courses->when($status, function ($query) use ($status) {
             return $query->where('status', $status);
         });
 
@@ -83,13 +84,38 @@ class CourseController extends Controller
      */
     public function show($id)
     {
-        $course = Course::find($id);
+        $course = Course::with(['Reviews', 'Chapters.Lessons', 'Images', 'Mentor'])->withCount(['MyCourses as total_student'])->find($id);
         if (!$course) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'course not found'
             ], 404);
         }
+
+        $reviews = $course->reviews->toArray();
+
+        if (count($reviews) > 0) {
+            $user_ids = array_column($reviews, 'user_id');
+            $users = getUserByIds($user_ids);
+
+            if ($users['status'] === 'error') {
+                $reviews = [];
+            } else {
+                foreach ($reviews as $key => $review) {
+                    $userIndex = array_search($review['user_id'], array_column($users['data'], 'id'));
+                    $reviews[$key]['users'] = $users['data'][$userIndex];
+                }
+            }
+        }
+
+        $course = $course->toArray();
+        $course['reviews'] = $reviews;
+        $course = collect($course);
+
+        $chapter = Chapter::withCount('Lessons')->get()->toArray();
+        $totalVideo = array_sum(array_column($chapter, 'lessons_count'));
+
+        $course['total_video'] = $totalVideo;
 
         return response()->json([
             'status' => 'success',

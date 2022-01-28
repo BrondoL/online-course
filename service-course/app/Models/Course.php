@@ -32,4 +32,14 @@ class Course extends Model
     {
         return $this->hasMany(ImageCourse::class)->orderBy('id', 'DESC');
     }
+
+    public function Reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function MyCourses()
+    {
+        return $this->hasMany(MyCourse::class);
+    }
 }
