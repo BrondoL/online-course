@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
 use App\Models\MyCourse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -72,46 +73,52 @@ class MyCourseController extends Controller
             ], 409);
         }
 
+        $course = Course::find($course_id);
+
+        if ($course->type === 'premium') {
+            if ($course->price === 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'price cannot be 0'
+                ], 422);
+            }
+
+            $order = postOrder([
+                'user' => $user['data'],
+                'course' => $course->toArray()
+            ]);
+
+            if ($order['status'] === 'error') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $order['message']
+                ], $order['http_code']);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'my course has been created successfully',
+                'data' => $order['data']
+            ]);
+        } else {
+            $myCourse = MyCourse::create($data);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'my course has been created successfully',
+                'data' => $myCourse
+            ], 201);
+        }
+    }
+
+    public function createPremiumAccess(Request $request)
+    {
+        $data = $request->all();
         $myCourse = MyCourse::create($data);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'my course has been created successfully',
             'data' => $myCourse
-        ], 201);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        ]);
     }
 }
