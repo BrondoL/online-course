@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const { index } = require("../controllers/OrderController");
+const { store } = require("../controllers/WebhookController");
 
-router.get("/", index);
+router.post("/midtrans", store);
 
 module.exports = router;
