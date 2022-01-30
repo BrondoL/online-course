@@ -3,6 +3,8 @@ const base64img = require("base64-img");
 const fs = require("fs");
 const { Media } = require("../models");
 
+const { HOSTNAME } = process.env;
+
 module.exports = {
     index: async (req, res) => {
         try {
@@ -11,7 +13,7 @@ module.exports = {
             });
 
             const mappedMedia = media.map((m) => {
-                m.image = `${req.get("host")}/${m.image}`;
+                m.image = `${HOSTNAME}/${m.image}`;
                 return m;
             });
 
@@ -58,7 +60,7 @@ module.exports = {
                         message: "Berhasil mengupload image",
                         data: {
                             id: media.id,
-                            image: `${req.get("host")}/images/${fileName}`,
+                            image: `${HOSTNAME}/images/${fileName}`,
                         },
                     });
                 } catch (error) {
